@@ -26,3 +26,17 @@ Run the executable again.
 Utility was created using ChatGpt
 
 Уилита была создана при помощи ChatGpt
+
+
+**Support**
+If this was useful for you, I would be grateful for any support.
+Если вам полезна моя утилита, буду признателен любой поддержке
+
+**Binance Trc20**
+TXvy99Tmkmr6okh1k8KrLt8Jq5c6vVr2dR
+
+**PayPal**
+Leshugan@gmail.com
+
+**MasterCard**
+5355 2800 4784 0655
