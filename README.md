@@ -19,3 +19,9 @@ RU
 
 Удаление
 Запустите исполняемый файл повторно.
+
+
+
+
+Utility was created using ChatGpt
+Уилита была создана при помощи ChatGpt
