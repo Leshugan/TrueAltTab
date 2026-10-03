@@ -1,0 +1,59 @@
+name: Сборка
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Распаковать архив из корня (если загружен)
+        run: |
+          ZIP=$(ls *.zip 2>/dev/null | head -n1 || true)
+          if [ -n "$ZIP" ]; then
+            unzip -o -q "$ZIP" -d .
+            rm -f "$ZIP"
+            if [ -f RELEASE.md ]; then
+              echo "DO_RELEASE=1" >> "$GITHUB_ENV"
+              rm -f RELEASE.md
+            fi
+            git config user.name "github-actions[bot]"
+            git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -q -m "Обновление исходников" || true
+            git push
+          fi
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-gnu
+
+      - name: Установить mingw-w64
+        run: sudo apt-get update -q && sudo apt-get install -y -q mingw-w64
+
+      - name: Собрать
+        run: cargo build --release --target x86_64-pc-windows-gnu
+
+      - name: Узнать версию
+        run: echo "VER=$(grep -oP 'const VERSION: &str = "\K[^"]+' src/main.rs)" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: TrueAltTab.exe
+          path: target/x86_64-pc-windows-gnu/release/TrueAltTab.exe
+          archive: false
+
+      - name: Выложить релиз (если в архиве есть RELEASE.md)
+        if: env.DO_RELEASE == '1'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VER }}
+          name: TrueAltTab ${{ env.VER }}
+          body: ""
+          files: target/x86_64-pc-windows-gnu/release/TrueAltTab.exe
