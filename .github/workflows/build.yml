@@ -15,8 +15,13 @@ jobs:
 
       - name: Распаковать архив из корня (если загружен)
         run: |
-          ZIP=$(ls *.zip 2>/dev/null | head -n1 || true)
+          if [ -f TrueAltTab-repo.zip ]; then ZIP=TrueAltTab-repo.zip; else ZIP=$(ls *.zip 2>/dev/null | head -n1 || true); fi
           if [ -n "$ZIP" ]; then
+            # Убираем из репозитория всё старое (кроме файлов сборки и самого архива) —
+            # остаётся ровно то, что лежит в архиве. История коммитов сохраняется.
+            git ls-files | grep -v '^\.github/' | grep -vxF "$ZIP" | while IFS= read -r f; do
+              git rm -q -- "$f"
+            done
             unzip -o -q "$ZIP" -d .
             rm -f "$ZIP"
             if [ -f RELEASE.md ]; then
@@ -41,7 +46,8 @@ jobs:
         run: cargo build --release --target x86_64-pc-windows-gnu
 
       - name: Узнать версию
-        run: echo "VER=$(grep -oP 'const VERSION: &str = "\K[^"]+' src/main.rs)" >> "$GITHUB_ENV"
+        run: |
+          echo "VER=$(grep -oP 'const VERSION: &str = "\K[^"]+' src/main.rs)" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v7
         with:
